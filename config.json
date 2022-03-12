@@ -1,7 +1,8 @@
-{   "Lunart":"Lunar - OTI5MTIxNDU1MDgwMzYyMDY0.YdityQ.8Z6tDgMcde5hndrjqbDHreS7b5M",
-    "Larbot":"LarbaldBot - ODg4ODkyMDMzMTUyOTc0ODY4.YUZTNw.TVN2BmnjPh7NydpT1M76Y7ISX1c",
-    "Solar":"ODkxMzI1MjM3MDQ2Njc3NTE0.YU8tUA.bDXZVxXiFBjL5T4qjjw0gqqX62k",
-    "Token": "ODkxMzI1MjM3MDQ2Njc3NTE0.YU8tUA.bDXZVxXiFBjL5T4qjjw0gqqX62k",
+
+{"Lunart":"Lunar - OTI5MTIxNDU1MDgwMzYyMDY0.YdityQ.8Z6tDgMcde5hndrjqbDHreS7b5M",
+ "Larbot":"LarbaldBot - ODg4ODkyMDMzMTUyOTc0ODY4.YUZTNw.TVN2BmnjPh7NydpT1M76Y7ISX1c",
+ "Solar":"ODkxMzI1MjM3MDQ2Njc3NTE0.YU8tUA.naLBdRh1IfqyEJaGALZXQ5lxMGE",
+    "Token": "OTI5MTIxNDU1MDgwMzYyMDY0.YdityQ.58sxnwKG9gBIgZp6R71b1faexFA",
     "Database":"mongodb+srv://Subvius:NX6Jb99r@solar.nikdj.mongodb.net/Solar?retryWrites=true&w=majority",
     "EVERYONEID": "817436827660845147",
     "PARENTID": "929697412623257630",
