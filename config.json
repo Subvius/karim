@@ -1,6 +1,6 @@
-{"Lunart":"Lunar - OTI5MTIxNDU1MDgwMzYyMDY0.YdityQ.8Z6tDgMcde5hndrjqbDHreS7b5M",
- "Larbot":"LarbaldBot - ODg4ODkyMDMzMTUyOTc0ODY4.YUZTNw.TVN2BmnjPh7NydpT1M76Y7ISX1c",
- "Solar":"ODkxMzI1MjM3MDQ2Njc3NTE0.YU8tUA.naLBdRh1IfqyEJaGALZXQ5lxMGE",
+{   "Lunart":"Lunar - OTI5MTIxNDU1MDgwMzYyMDY0.YdityQ.8Z6tDgMcde5hndrjqbDHreS7b5M",
+    "Larbot":"LarbaldBot - ODg4ODkyMDMzMTUyOTc0ODY4.YUZTNw.TVN2BmnjPh7NydpT1M76Y7ISX1c",
+    "Solar":"ODkxMzI1MjM3MDQ2Njc3NTE0.YU8tUA.bDXZVxXiFBjL5T4qjjw0gqqX62k",
     "Token": "ODkxMzI1MjM3MDQ2Njc3NTE0.YU8tUA.bDXZVxXiFBjL5T4qjjw0gqqX62k",
     "Database":"mongodb+srv://Subvius:NX6Jb99r@solar.nikdj.mongodb.net/Solar?retryWrites=true&w=majority",
     "EVERYONEID": "817436827660845147",
@@ -10,5 +10,6 @@
     "STATUSMSG": "934514548512284732",
     "STATUSCHANNEL": "930155668181225483",
     "PERMANENTLINK": "https://discord.gg/zHzZ4fzeGa",
-    "BOTINVITE":"https://discord.com/api/oauth2/authorize?client_id=929121455080362064&permissions=8&scope=bot%20applications.commands"
+    "BOTINVITE":"https://discord.com/api/oauth2/authorize?client_id=929121455080362064&permissions=8&scope=bot%20applications.commands",
+    "Ranks": ["Member", "Moon_plus", "Developer", "LunarPhase", "Admin", "Staff", "Partner","Owner"]
 }

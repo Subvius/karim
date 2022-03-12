@@ -39,7 +39,8 @@ module.exports = async (client) => {
   // PERMISSIONS CHECK //
 
   client.on("ready", async () => {
-    const MainGuld = await client.guilds.cache.get("817436827660845147");
+    // const MainGuld = await client.guilds.cache.get("817436827660845147"); // MainGuld
+    const MainGuld = await client.guilds.cache.get("947916422590365696"); // TestGuild
     MainGuld.commands.set(CommandsArray).then(async (command) => {
       const Roles = (commandName) => {
         const cmdPerms = CommandsArray.find(

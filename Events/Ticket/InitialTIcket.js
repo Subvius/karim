@@ -17,6 +17,7 @@ module.exports = {
     if (!interaction.isButton) return;
 
     const { guild, member, customId } = interaction;
+    if (!guild) return;
 
     const Data = await TicketSetupData.findOne({ GuildID: guild.id });
     if (!Data) return;
@@ -60,7 +61,7 @@ module.exports = {
           .setDescription(
             "Please wait patiently for response from the Staff team, in the mean while, describe your issue in as much detail as possible."
           )
-          .setFooter({text: "The buttons below are only for Staff"});
+          .setFooter({ text: "The buttons below are only for Staff" });
 
         const Buttons = new MessageActionRow();
         Buttons.addComponents(
@@ -79,13 +80,12 @@ module.exports = {
             .setLabel("Unlock")
             .setStyle("SUCCESS")
             .setEmoji("🔓"),
-            
+
           new MessageButton()
             .setCustomId("claim")
             .setLabel("Claim")
             .setStyle("PRIMARY")
             .setEmoji("🛄")
-            
         );
 
         channel.send({

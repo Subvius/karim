@@ -4,6 +4,7 @@ const {
   WebhookClient,
   GuildMember,
 } = require("discord.js");
+const GuildDB = require("../../Schemas/clientGuildCreateDB");
 
 module.exports = {
   name: "guildMemberAdd",
@@ -15,15 +16,22 @@ module.exports = {
     const { user, guild } = member;
     if (member.bot) return;
 
-    const Welcomer = new WebhookClient({
-      id: "929392855649230898",
-      token:
-        "uedHt_Sdjh-JLFP49Xj4tydgOVziYZLk_KUN3KrC5JfenceFACFM3UfM7K_IJ5gWFi8p",
-    });
+    const GuildInfo = await GuildDB.findOne({ GuildID: guild.id });
+    const welcomeChannel = guild.channels.cache.get(GuildInfo.WelcomeChannel);
+    if (!GuildInfo.WelcomeChannel || !welcomeChannel) return;
+
+    // const Welcomer = new WebhookClient({
+    //   id: "929392855649230898",
+    //   token:
+    //     "uedHt_Sdjh-JLFP49Xj4tydgOVziYZLk_KUN3KrC5JfenceFACFM3UfM7K_IJ5gWFi8p",
+    // });
 
     const Welcome = new MessageEmbed()
       .setColor("AQUA")
-      .setAuthor(user.tag, user.avatarURL({ dynamic: true, size: 512 }))
+      .setAuthor({
+        name: user.tag,
+        iconURL: user.avatarURL({ dynamic: true, size: 512 }),
+      })
       .setThumbnail(user.avatarURL({ dynamic: true, size: 512 }))
       .setDescription(
         `
@@ -31,8 +39,8 @@ module.exports = {
         Account Created: <t:${parseInt(user.createdTimestamp / 1000)}:R> \n
         Latest Member Count: **${guild.memberCount}**`
       )
-      .setFooter(`ID: ${user.id}`);
+      .setFooter({ text: `ID: ${user.id}` });
 
-    Welcomer.send({ embeds: [Welcome] });
+    welcomeChannel.send({ embeds: [Welcome] });
   },
 };
