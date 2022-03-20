@@ -6,6 +6,7 @@ module.exports = model(
     OwnerID: String, // Guild owner ID
     GuildID: String, // Guild ID
     GuildName: String, // Guild name
+    GuildCreateTS: String, // Guild creation timestamp
     GuildLevel: Number, // Guild level
     GuildXP: Number, // Guild xp
     GuildMembers: [String], // List of guild members

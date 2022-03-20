@@ -23,8 +23,11 @@ module.exports = {
             ],
           }) && client.commands.delete(interaction.commandName)
         );
-
-      command.execute(interaction, client);
+      try {
+        command.execute(interaction, client);
+      } catch (e) {
+        console.log(e);
+      }
     }
   },
 };

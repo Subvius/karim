@@ -184,6 +184,26 @@ module.exports = {
               }`,
               callback
             );
+            const dirs = [
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec",
+            ].forEach(async (dir) => {
+              fs.mkdirSync(
+                `${process.cwd()}/Container/Logs/User/${
+                  new Date().toString().split(" ")[3]
+                }/${dir}`
+              );
+            });
           }
 
           // if (new Date().toLocaleTimeString() >= "00:00:00") return;

@@ -1,4 +1,10 @@
-const { MessageEmbed, Client, CommandInteraction } = require("discord.js");
+const {
+  MessageEmbed,
+  Client,
+  CommandInteraction,
+  MessageButton,
+  MessageActionRow,
+} = require("discord.js");
 const DB = require("../../Schemas/ProfileDB");
 const Emojis = require("../../Container/src/emoji.json");
 const Ranks = require("../../Container/src/ranks.json");
@@ -27,7 +33,6 @@ module.exports = {
    * @param {Client} client
    */
   async execute(interaction, client) {
-    await interaction.deferReply();
     const { options, user } = interaction;
     const Member = options.getString("userid") || user.id;
 
@@ -99,6 +104,9 @@ module.exports = {
     const UserXPData = [];
     const Labels = [];
     const DescriptionText = [];
+    let previousData = 0;
+    let WeeklyStats = 0;
+    let MonthlyStats = 0;
     const files = fs.readdirSync(
       `${process.cwd()}/Container/Logs/User/${
         new Date().toString().split(" ")[3]
@@ -113,33 +121,47 @@ module.exports = {
         "utf-8"
       );
       UserXPData.push(
-        Math.floor(Number(JSON.parse(dataJSON)["670233042715148319"]["XP"]))
+        Math.floor(Number(JSON.parse(dataJSON)["670233042715148319"]["XP"])) -
+          previousData
       );
+      MonthlyStats +=
+        Math.floor(Number(JSON.parse(dataJSON)["670233042715148319"]["XP"])) -
+        previousData;
+
       Labels.push(
         new Date(
-          `${file.split(".")[0].split(" ")[0]} ${(
-            Number(file.split(".")[0].split(" ")[1]) + 1
-          ).toString()} ${new Date().toUTCString().split(" ")[3]}`
+          `${file.split(".")[0]} ${new Date().toUTCString().split(" ")[3]}`
         )
           .toISOString()
           .split("T")[0]
       );
 
       DescriptionText.push(
-        `\`•\`${
+        `\`•\` ${
           new Date(
-            `${file.split(".")[0].split(" ")[0]} ${(
-              Number(file.split(".")[0].split(" ")[1]) + 1
-            ).toString()} ${new Date().toUTCString().split(" ")[3]}`
+            `${file.split(".")[0]} ${new Date().toUTCString().split(" ")[3]}`
           )
             .toISOString()
             .split("T")[0]
         }: **${Math.floor(
           Number(JSON.parse(dataJSON)["670233042715148319"]["XP"])
-        )}**`
+        )}** | ${
+          Math.floor(Number(JSON.parse(dataJSON)["670233042715148319"]["XP"])) -
+          previousData
+        }`
+      );
+      previousData = Math.floor(
+        Number(JSON.parse(dataJSON)["670233042715148319"]["XP"])
       );
     });
     const chart = new QuickChart();
+    while (UserXPData.length > 7) {
+      Labels.shift();
+      UserXPData.shift();
+    }
+    UserXPData.forEach((num) => {
+      WeeklyStats += num;
+    });
     chart.setConfig({
       type: "line",
       data: {
@@ -148,19 +170,37 @@ module.exports = {
           {
             label: "EXP",
             data: UserXPData,
+            backgroundColor: "rgba(40, 166, 70, 0.2)",
             borderColor: "rgb(40, 166, 70)",
-            fill: {
-              target: true,
-              above: "rgb(40, 166, 70)",
-              below: "rgb(40, 166, 70)",
-            },
-            tension: 0.1,
+            lineTension: 0.4,
           },
         ],
+      },
+      options: {
+        title: {
+          align: "end",
+          display: true,
+          position: "left",
+          text: "Raw UEXP",
+        },
+        scales: {
+          xAxes: [
+            {
+              scaleLabel: {
+                display: true,
+                labelString: "Date",
+              },
+            },
+          ],
+        },
       },
     });
     chart.setBackgroundColor("transparent");
     const url = await chart.getShortUrl();
+    DescriptionText.reverse();
+    DescriptionText.push(
+      `\n\`•\` Weekly: **${WeeklyStats}**\n\`•\` Monthly: **${MonthlyStats}**`
+    );
     const Embed = new MessageEmbed()
       .setColor("BLURPLE")
       .setAuthor({
@@ -168,24 +208,180 @@ module.exports = {
         iconURL: `attachment://${iconPng}`,
       })
       .setImage(url)
-      .addFields({ name: "UEXP History", value: DescriptionText.join("\n") })
+      .addFields({
+        name: "UEXP History (Total | Per Day)",
+        value: DescriptionText.join("\n"),
+      })
       .setDescription(
         // `${emoji} ${member.username || "Something went wrong"}
         `
-        ${guildText}
-        Level: **${Profile.Level}**
-        XP: **${Math.floor(
+        ${guildText}\nLevel: **${Profile.Level}**\nXP: **${Math.floor(
           5 * (Profile.Level ^ 2) +
             50 * Profile.Level +
             100 -
             (5 * (Profile.Level ^ 2) + 50 * Profile.Level + 100 - Profile.XP)
-        )}/${Math.floor(5 * (Profile.Level ^ 2) + 50 * Profile.Level + 100)}**
-        
+        )}/${Math.floor(5 * (Profile.Level ^ 2) + 50 * Profile.Level + 100)}**\n
       `
       );
-    interaction.editReply({
+    const pageType = {};
+    const id = user.id;
+
+    const getRow = (id) => {
+      const row = new MessageActionRow();
+      row.addComponents([
+        new MessageButton()
+          .setCustomId("overal")
+          .setStyle("SECONDARY")
+          .setLabel("Overal")
+          .setDisabled(pageType[id] === "overal"),
+        new MessageButton()
+          .setCustomId("permonth")
+          .setStyle("SECONDARY")
+          .setLabel("UEXP per Month")
+          .setDisabled(pageType[id] === "permonth"),
+      ]);
+      return row;
+    };
+    pageType[id] = pageType[id] || "overal";
+    interaction.reply({
       embeds: [Embed],
       files: [`Assets/Ranks/${iconPng}`],
+      components: [getRow(id)],
+    });
+    // Bar chart //
+    const filter = (i) => i.user.id === user.id;
+    const time = 1000 * 60 * 5;
+    let collector;
+    const monthLabels = [];
+    const tempEXP = {};
+    const Exp = [];
+    const dirs = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ].forEach((dir) => {
+      if (new Date(`${dir} 2022`) > Date.now()) return;
+      console.log(dir);
+      monthLabels.push(dir);
+      let dirEXP = 0;
+      const files = fs
+        .readdirSync(
+          `${process.cwd()}/Container/Logs/User/${
+            new Date().toString().split(" ")[3]
+          }/${dir}`
+        )
+        .forEach((file) => {
+          if (!file.endsWith(".json")) return;
+          const dataJSON = fs.readFileSync(
+            `${process.cwd()}/Container/Logs/User/${
+              new Date().toString().split(" ")[3]
+            }/${dir}/${file}`,
+            "utf-8"
+          );
+          dirEXP += Math.floor(
+            Number(JSON.parse(dataJSON)["670233042715148319"]["XP"])
+          );
+        });
+      Exp.push(dirEXP);
+    });
+    const monthChart = new QuickChart();
+    monthChart.setConfig({
+      type: "bar",
+      data: {
+        labels: monthLabels,
+        datasets: [
+          {
+            label: "UEXP Per Month",
+            backgroundColor: [
+              "rgba(197, 19, 20, 0.2)",
+              "rgba(162, 85, 222, 0.2)",
+              "rgba(95, 190, 235, 0.2)",
+              "rgba(255, 255, 255, 0.2)",
+              "rgba(42, 119, 11, 0.2)",
+              "rgba(202, 127, 198, 0.2)",
+              "rgba(255, 1, 0, 0.2)",
+              "rgba(92, 234, 34, 0.2)",
+              "rgba(0, 7, 107, 0.2)",
+              "rgba(255, 3, 193, 0.2)",
+              "rgba(255, 204, 0, 0.2)",
+              "rgba(83, 115, 254, 0.2)",
+            ],
+            borderColor: [
+              "rgb(197,19,20)",
+              "rgb(162,85,222)",
+              "rgb(95,190,235)",
+              "rgb(255,255,255)",
+              "rgb(42,119,11)",
+              "rgb(202,127,198)",
+              "rgb(255,1,0)",
+              "rgb(92,234,32)",
+              "rgb(0,7,107)",
+              "rgb(254,2,192)",
+              "rgb(255,203,0)",
+              "rgb(83,115,254)",
+            ],
+            borderWidth: 1,
+            data: Exp,
+          },
+        ],
+      },
+      options: {
+        title: {
+          align: "end",
+          display: true,
+          position: "left",
+          text: "UEXP Per Month",
+        },
+        scales: {
+          xAxes: [
+            {
+              scaleLabel: {
+                display: true,
+                labelString: "Date",
+              },
+            },
+          ],
+        },
+      },
+    });
+    monthChart.setBackgroundColor("transparent");
+    const monthURL = await monthChart.getShortUrl();
+
+    collector = interaction.channel.createMessageComponentCollector({
+      filter,
+      time,
+    });
+
+    collector.on("collect", (btnIn) => {
+      if (!btnIn) return;
+      try {
+        btnIn.deferUpdate();
+        if (!["overal", "permonth"].includes(btnIn.customId)) return;
+        if (btnIn.customId === "overal") {
+          pageType[id] = "overal";
+          interaction.editReply({
+            embeds: [Embed.setImage(url)],
+            components: [getRow(id)],
+            files: [`Assets/Ranks/${iconPng}`],
+          });
+        } else if (btnIn.customId === "permonth") {
+          pageType[id] = "permonth";
+          interaction.editReply({
+            embeds: [Embed.setImage(monthURL)],
+            components: [getRow(id)],
+            files: [`Assets/Ranks/${iconPng}`],
+          });
+        }
+      } catch {}
     });
   },
 };

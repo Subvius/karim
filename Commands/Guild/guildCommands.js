@@ -157,6 +157,7 @@ module.exports = {
           await DB.create({
             OwnerID: user.id,
             GuildID: guildID,
+            GuildCreateTS: Math.floor(Date.now() / 1000),
             GuildName: guildName,
             GuildLevel: 0,
             GuildXP: 0,
@@ -359,7 +360,7 @@ module.exports = {
               .setThumbnail(`attachment://${GuildInfo.GuildLogo}`)
               // .setThumbnail(`${GuildInfo.GuildLogo}`)
               .setDescription(
-                `${GuildInfo.GuildDescription}
+                `${GuildInfo.GuildDescription}\n\`•\` Created: <t:${GuildInfo.GuildCreateTS}:R>
                       `
               )
               .addField(
